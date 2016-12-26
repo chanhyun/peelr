@@ -1,0 +1,103 @@
+```{r}
+rm(list=ls())
+```
+
+
+Step1
+```{r}
+DF <- read.csv('example_population.csv')
+str(DF)
+```
+
+
+```{r}
+head(DF, 5)
+```
+
+
+Step2
+```{r, eval=F}
+install.packages("stringr")
+require('stringr')
+```
+
+```{r}
+temp <- str_split_fixed(DF[,1], "\\(", 2)
+head(temp, 10)
+```
+
+Step3
+```{r}
+NewCity <- str_split_fixed(temp[,1], " ", 2)
+head(NewCity, 10)
+```
+
+
+Step4
+```{r}
+colnames(NewCity) <- c("Provinces", "City")
+```
+
+
+Step5
+```{r}
+DF <- data.frame(NewCity, DF[,c(2:7)])
+head(DF, 10)
+```
+
+
+Step6
+```{r}
+DF[DF == " "] <- NA
+head(DF, 10)
+```
+
+
+
+
+Step7
+```{r}
+DF <- DF[complete.cases(DF),]
+head(DF, 10)
+```
+
+
+
+Step8
+```{r}
+for(i in 3:8){
+DF[,i] <- sapply(DF[,i], function(x) gsub(",", "", x))
+DF[,i] <- as.character(DF[,i])
+DF[,i] <- as.numeric(DF[,i])
+}
+str(DF)
+```
+
+
+Step9
+```{r}
+ProPopul <- tapply(DF$Population, DF$Provinces, sum)
+ProPopul
+```
+
+
+Step10
+```{r}
+DF[,1] <- factor(DF[,1])
+ProPopul <- tapply(DF$Population, DF$Provinces, sum)
+ProPopul
+```
+
+
+Step11
+```{r ch1_ex_05_01, fig.width= 14, fig.height=7}
+ggplot(DF, aes(x=Provinces, y=Population, fill=Provinces)) +
+  geom_bar(stat='identity') +
+  theme_wsj()
+```
+
+
+Step12
+```{r}
+write.csv(DF, "example_population_f.csv")
+```

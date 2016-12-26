@@ -1,0 +1,80 @@
+
+##Step1.
+```{r}
+library(data.table)
+DF <- fread("example_conveniencestore.csv", encoding="UTF-8", data.table=F)
+```
+
+##Step2.
+```{r}
+S <- DF[sample(nrow(DF), 5000),]
+```
+
+
+##Step3.
+```{r}
+head(S,2)
+str(S)
+```
+
+
+##Step4.
+```{r}
+sort(table(S$sellproduct))
+```
+
+
+##Step5.
+```{r}
+library(stringr)
+S$time <- str_split_fixed(S$Date, " ", 2)[,2]
+S$hour <- str_split_fixed(S$time, ":", 3)[,1]
+head(S, 1)
+```
+
+
+##Step6.
+```{r}
+library(dplyr)
+S <- tbl_dt(S)
+S2 <- filter(S, sellproduct == "가스큐팩 1.6리터(P)")
+```
+
+
+##Step7.
+```{r}
+freq <- table(S2$hour)
+freq
+```
+
+
+##Step8.
+```{r}
+rv <- as.vector(freq)
+rv <- rv[!duplicated(rv)]
+rv <- sort(rv)
+rv
+```
+
+
+##Step9.
+```{r}
+prv <- prop.table(rv)
+prv
+```
+
+
+
+##Step10.
+```{r}
+exps <- rv*prv
+exps
+```
+
+
+##Step11.
+```{r}
+sum(exps)
+```
+
+

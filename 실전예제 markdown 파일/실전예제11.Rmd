@@ -1,0 +1,54 @@
+
+
+Step1.
+```{r}
+TS <- read.csv("example_ts.csv")
+TS
+```
+
+
+Step2.
+```{r eval=F}
+library("ggplot2")
+library("ggthemes")
+```
+
+
+Step3.
+```{r ch3_ex5_01}
+ggplot(TS, aes(x=Date, y=Sales)) + geom_line()
+```
+
+
+Step4.
+```{r ch3_ex5_02}
+ggplot(TS, aes(x=factor(Date), y=Sales, group=1)) + geom_line()
+```
+
+
+Step5.
+```{r ch3_ex5_03}
+ggplot(TS, aes(x=factor(Date), y=Sales, group=1)) + geom_line() + geom_point()
+```
+
+
+Step6.
+```{r ch3_ex5_04}
+ggplot(TS, aes(x=factor(Date), y=Sales, group=1)) + geom_line() + geom_point() + theme_light()
+```
+
+
+Step7.
+```{r ch3_ex5_05}
+ggplot(TS, aes(x=factor(Date), y=Sales, group=1)) + geom_line(colour="orange1", size=1) + geom_point(colour="orangered2", size=4) + theme_light()
+```
+
+
+Step8.
+```{r ch3_ex5_06}
+ggplot(TS, aes(x=factor(Date), y=Sales, group=1)) +
+  geom_line(colour="orange1", size=1) + 
+  geom_point(colour="orangered2", size=4) + 
+  xlab("년도")+ ylab("매출") + ggtitle("A기업 월별 매출") + 
+  theme_light()
+```

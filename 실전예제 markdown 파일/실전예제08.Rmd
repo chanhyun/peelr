@@ -1,0 +1,55 @@
+
+Step1.
+```{r}
+DF <- read.csv("example_cancer.csv", stringsAsFactors = F, na="기록없음")
+str(DF)
+attach(DF)
+```
+
+
+Step2.
+```{r}
+mean(age)
+```
+
+
+Step3.
+```{r}
+summary(age)
+```
+
+
+Step4.
+```{r ch2-01-ex4-01}
+boxplot(age, range=1.5)
+grid()
+```
+
+
+Step5.
+```{r}
+distIQR <- IQR(age, na.rm=T)
+```
+
+
+Step6.
+```{r}
+posIQR <- quantile(age, probs=c(0.25, 0.75), na.rm=T)
+posIQR
+```
+
+
+Step7.
+```{r}
+DownWhisker <- posIQR[[1]] - distIQR*1.5
+UpWhisker <- posIQR[[2]] + distIQR*1.5
+DownWhisker; UpWhisker
+```
+
+
+Step8.
+```{r}
+Outlier <- subset(DF, subset=(DF$age < DownWhisker | DF$age > UpWhisker))
+Outlier
+```
+

@@ -1,0 +1,80 @@
+#실행방법
+
+Chunk안에서 Ctrl+Alt+C를 누르면 Chunk안에 있는 코드가 실행됩니다.
+
+Ctrl+Alt+N을 누르면 다음 Chunk가 실행됩니다.
+
+Ctrl+Alt+R을 누르면 전체가 한번에 실행됩니다.
+
+
+Step0. 모든 객체를 삭제하고 시작합니다.
+```{r}
+rm(list=ls())
+```
+
+
+Step1
+```{r eval=F}
+install.packages("hflights")
+```
+
+Step2
+```{r}
+library("hflights")
+```
+
+Step3
+```{r eval=F}
+hflights
+```
+
+
+Step4
+```{r}
+str(hflights)
+```
+
+
+Step5
+```{r}
+CountOfDest <- table(hflights$Dest)
+CountOfDest
+```
+
+
+Step6
+```{r}
+length(CountOfDest)
+```
+
+
+Step7
+```{r}
+range(CountOfDest)
+```
+
+
+Step8
+```{r}
+CountOfDest[CountOfDest == 1]
+CountOfDest[CountOfDest == 9820]
+```
+
+
+Step9
+```{r}
+SelectedDest <- CountOfDest[CountOfDest > 6000]
+SelectedDest
+```
+
+
+Step10
+```{r}
+addmargins(SelectedDest, margin=1)
+```
+
+
+Step11
+```{r ch1_ex1_01}
+barplot(SelectedDest)
+```

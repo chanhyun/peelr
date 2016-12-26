@@ -1,0 +1,57 @@
+
+
+Step1.
+```{r, eval=F}
+library("dplyr")
+library("ggplot2")
+library("ggthemes")
+```
+
+
+Step2.
+```{r}
+DF <- read.csv("population_f.csv")
+DF <- DF[,-1] #불필요한 첫번째 열은 삭제합니다.
+
+```
+
+Step3.
+```{r}
+DF <- mutate(DF, SexF = ifelse(SexRatio < 1, "여자비율높음", ifelse(SexRatio > 1, "남자비율높음", "남여비율같음")))
+```
+
+Step4.
+```{r}
+DF$SexF <- factor(DF$SexF)
+DF$SexF <- ordered(DF$SexF, c("여자비율높음", "남여비율같음", "남자비율높음"))
+```
+
+
+Step5.
+```{r}
+DF2 <- filter(DF, Provinces=="경기도")
+```
+
+
+Step6.
+```{r ch3_ex7_01, fig.width=27, fig.height=5}
+Graph <- ggplot(DF2, aes(x=City, y=(SexRatio-1), fill=SexF)) + geom_bar(stat='identity', position='identity') + theme_wsj()
+Graph
+```
+
+
+Step7.
+```{r}
+DF4 <- filter(DF, Provinces=="서울특별시")
+```
+
+
+Step8.
+```{r ch3_ex7_02, fig.width=13, fig.height=5}
+Graph2 <- ggplot(DF4, aes(x=City, y=(SexRatio-1), fill=SexF)) + geom_bar(stat='identity', position='identity') + theme_wsj()
+Graph2
+```
+
+
+
+

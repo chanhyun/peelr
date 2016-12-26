@@ -1,0 +1,121 @@
+
+
+#Step1.
+```{r}
+DF <- fread("example_gamedata.csv", data.table = F)
+head(DF, 1)
+```
+
+
+#Step2. 376966이용자의 데이터만 살펴봅니다.
+```{r}
+library(dplyr)
+DF2 <- tbl_df(DF)
+options(dplyr.print_max = 1e9)
+DF2 %>% filter(memberID==376966)
+```
+
+
+
+#step3. 376966이용자의 모든 스테이지 값을 살펴봅니다.
+```{r}
+DF2 %>% filter(memberID==376966) %>% group_by(stage, success) %>% select(success) %>% summarise(count = n())
+```
+
+
+
+##Step4. 모든 사람들의 실패/성공 횟수를 구합니다.
+```{r}
+SF <- DF2 %>% group_by(stage, success) %>% select(success) %>% summarise(count = n())
+SF
+```
+
+
+
+##Step5. 그래프를 그립니다.
+```{r new_ch5_ex4_01}
+library(ggplot2)
+library(ggthemes)
+ggplot(SF, aes(x=factor(stage), y=count, colour=success, group=success)) + geom_line(size=0.7) + geom_point(size=4) + ggtitle("A사의 B게임 스테이지별 성공여부 그래프") + theme_wsj()
+```
+
+
+##Step6. 성공한 횟수만 따로 저장합니다.
+```{r}
+SF2 <- SF %>% filter(success == T)
+SF2
+```
+
+
+
+
+##Step7. 스테이지별 전체 횟수를 구합니다ㅣ.
+```{r}
+SFT <- DF2 %>% group_by(stage) %>% summarise(total = n())
+SFT
+```
+
+
+
+##Step8. 성공 횟수와 전체 횟수를 합칩니다.
+```{r}
+SF3 <- cbind(SF2, total = SFT$total)
+SF3
+```
+
+
+
+##Step9. 성공 비율을 나타냅니다.
+```{r}
+SF4 <- SF3 %>% mutate(p = count/total)
+SF4
+```
+
+
+
+##Step10. stage_03일 때 기하분포를 그립니다.
+```{r new_ch5_ex4_02}
+x <- 1:15
+y <- dgeom(x, 0.327)
+plot(x,y,type="h")
+```
+
+
+
+##Step11. 기하분포 값을 자세히 봅니다.
+```{r}
+round(y, 3)
+```
+
+
+
+##Step12. 누적 기하분포 확률값을 구합니다.
+```{r}
+pgeom(5, 0.327)
+pgeom(4, 0.327)
+```
+
+
+
+#Step13. 0.9가 될때까지의 p값을 구하는 함수만들기
+```{r}
+findp <- function(n,p){
+  for(i in 1:99){
+    a <- pgeom(n, 0.01*i)
+    if(a > p){
+      print(paste0("n값이 ",n, "일 때"))
+      print(paste0("p값 " , 0.01*i, "을 사용하면"))
+      print(paste0("확률 ", a,"이 나옵니다"))
+      break()
+    }
+  }
+}
+```
+
+
+
+#Step14. 6번만에 90%가 성공하는 p값을 구합니다.
+```{r}
+findp(6, 0.9)
+```
+

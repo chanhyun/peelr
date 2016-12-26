@@ -1,0 +1,63 @@
+```{r}
+rm(list=ls())
+```
+
+
+Step1.
+```{r}
+DF <- read.csv("example_salary.csv", stringsAsFactors = T, na="-")
+head(DF, 5)
+```
+
+
+Step2.
+```{r}
+colnames(DF)
+colnames(DF) <- c("age", "salary", "specialSalary", "workingTime", "numberOfWorker", "career", "sex")
+str(DF)
+```
+
+
+Step3.
+```{r}
+attach(DF)
+```
+
+Step2.
+```{r}
+Mean <- mean(salary, na.rm=T)
+Mean
+```
+
+
+Step3. 중앙값 구하기
+```{r}
+Mid <- median(salary, na.rm=T)
+Mid
+```
+
+
+Step4. 범위 구하기
+```{r}
+Range <- range(salary, na.rm=T)
+Range
+```
+
+
+```{r}
+w <- which(DF$salary==4064286)
+DF[w,]
+```
+
+Step5.
+```{r}
+Qnt <- quantile(salary, na.rm=T)
+Qnt
+```
+
+Step6.
+```{r}
+Salary <- list(평균월급=Mean, 중앙값월급=Mid, 월급범위=Range, 월급사분위=Qnt)
+Salary
+```
+

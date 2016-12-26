@@ -1,0 +1,35 @@
+```{r}
+rm(list=ls())
+```
+
+Step1
+```{r}
+DF <- read.csv('example_cancer.csv')
+```
+
+
+Step2
+```{r}
+str(DF)
+```
+
+Step3
+```{r}
+DegreeOfAge <- table(cut(DF$age, breaks=(1:11)*10))
+DegreeOfAge
+```
+
+       
+Step4
+```{r}
+rownames(DegreeOfAge) <- c("10s", "20s", "30s", "40s", "50s", "60s", "70s", "80s", "90s", "100s")
+DegreeOfAge
+```
+
+
+Step5
+```{r ch1_ex02_01, fig.width=6, fig.height=6}
+require("ggplot2")
+require("ggthemes")
+ggplot(data=DF, aes(x=age)) + geom_freqpoly(binwidth=10, size=1.4, colour="orange") + theme_wsj()
+```

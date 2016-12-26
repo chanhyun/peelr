@@ -1,0 +1,35 @@
+
+
+Step1.
+```{r}
+require("dplyr")
+require("ggplot2")
+require("ggthemes")
+```
+
+
+Step2.
+```{r}
+DF <- read.csv('population_f.csv')
+DF <- DF[,-1]
+DF <- tbl_df(DF)
+```
+
+
+Step3.
+```{r}
+DF2 <- mutate(DF, SexF = ifelse(SexRatio > 1, "남자비율높음", ifelse(SexRatio == 1, "남녀비율같음", "여자비율높음")))
+```
+
+
+Step4.
+```{r}
+DF3 <- filter(DF2, Provinces=="경기도")
+```
+
+
+Step5.
+```{r}
+Graph <- ggplot(DF3, aes(x=(SexRatio-1), y=reorder(City, SexRatio))) + geom_segment(aes(yend=City), xend=0, colour="grey50") + geom_point(size=4, aes(colour=SexF)) + theme_minimal()
+Graph
+```

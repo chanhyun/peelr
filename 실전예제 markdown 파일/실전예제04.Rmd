@@ -1,0 +1,71 @@
+```{r}
+rm(list=ls())
+```
+
+
+Step1
+```{r}
+require("data.table")
+```
+
+
+
+Step2
+```{r}
+DF <- fread("example_coffee.csv", header = T, stringsAsFactors = T, data.table = F)
+```
+
+
+Step3
+```{r}
+Size <- DF$sizeOfsite
+```
+
+
+Step4
+```{r}
+summary(Size)
+```
+
+Step5
+```{r}
+plot(Size)
+```
+
+
+Step6
+```{r}
+Size[Size > 10000] <- NA
+summary(Size)
+```
+
+
+
+Step7
+```{r}
+Size[Size == 0] <- NA
+Size <- Size[complete.cases(Size)]
+summary(Size)
+```
+
+
+Step8
+```{r}
+DegreeOfSize <- table(cut(Size, breaks=(0:72)*20))
+DegreeOfSize
+```
+
+
+
+Step10
+```{r eval=F}
+require("ggplot2")
+require("ggthemes")
+```
+
+```{r}
+ggplot(data=DF, aes(x=sizeOfsite)) +
+  geom_freqpoly(binwidth=10, size=1.2, colour="orange") +
+  scale_x_continuous(limits=c(0,300),breaks=seq(0,300,20)) +
+  theme_wsj()
+```

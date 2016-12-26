@@ -1,0 +1,119 @@
+
+#Step1.
+```{r eval=F}
+library(readxl)
+library(dplyr)
+library(stringr)
+library(rCharts)
+```
+
+#Step2.
+```{r}
+files <- sprintf("%4d년_%02d월_전국_실거래가_아파트(매매).xls", rep(2006:2014, each=12), 1:12)
+files
+```
+
+
+#Step3.
+```{r}
+DF <- NULL
+
+for(i in 1:length(files)){
+  t <- read_excel(path=paste0("rawdata","/",files[i]), sheet=1, col_names=T)
+  t <- mutate(t, date=paste0(substr(files[i], 1,4), "-", month=substr(files[i], 7,8),"-10"))
+  DF <- rbind(DF, t)
+}
+```
+
+
+#Step4.
+```{r}
+DF2 <- DF #안전을 위해 새로운 객체에 복사합니다.
+colnames(DF2) <- c("시군구", "본번", "부번", "단지명", "전용면적", "계약일", "거래금액", "층", "건축년도", "도로명주소", "date")
+```
+
+
+#Step5.
+```{r}
+DF3 <- data.frame(date=DF2$date, addr = DF2$시군구,  val=DF2$거래금액)
+```
+
+
+#Step6.
+```{r}
+str(DF3)
+DF3[['val']] <- as.integer(DF3[['val']])
+```
+
+
+#Step7.
+```{r}
+City <- str_split_fixed(DF3[,2], " ", 4)
+City <- data.frame(City)
+str(City)
+```
+
+
+#Step8.
+```{r}
+DF4 <- data.frame(date=DF3[,1], addr=City[,3], val=DF3[,3])
+str(DF4)
+```
+
+
+#Step9.
+```{r}
+DF5 <- DF4 %>% group_by(date, addr) %>% summarise(mean(val))
+```
+
+
+#Step10.
+```{r}
+colnames(DF5)[3] <- "val"
+DF5[['date']] <- as.character(DF5[['date']])
+DF5$val <- DF5$val/50
+str(DF5)
+```
+
+
+#Step11.
+```{r}
+DF5 <- read.csv("example_realty.csv")
+str(DF5)
+DF5[['date']] <- as.character(DF5[['date']])
+```
+
+
+#Step12.
+```{r}
+g2 <- rCharts$new()
+```
+
+
+#Step13.
+```{r}
+g2$setLib('libraries/nyt_home')
+g2$setTemplate(script = "libraries/nyt_home/layouts/nyt_home.html")
+```
+
+
+#Step14.
+```{r}
+g2$set(
+  description = "This data comes from the 'rt.molit.go.kr' dataset",
+  data = DF5,
+  groups = "addr"
+)
+```
+
+
+#Step15.
+```{r eval=F, results=F}
+g2
+```
+
+
+#Step16.
+```{r eval=F, results=F}
+cat(g2$html())
+```

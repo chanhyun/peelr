@@ -1,0 +1,49 @@
+
+Step1.
+```{r, eval=F}
+require("dplyr")
+require("ggplot2")
+require("ggthemes")
+```
+
+
+Step2.
+```{r}
+DF <- read.csv("population_f.csv", fileEncoding="euc-kr")
+DF <- DF[,-1] #첫번재 열은 ID숫자이기 때문에 삭제합니다.
+DF <- tbl_df(DF)
+DF
+```
+
+
+Step3.
+```{r}
+DF2 <- filter(DF, Provinces=="충청북도" | Provinces=="충청남도")
+```
+
+
+Step4.
+```{r}
+Graph <- ggplot(DF2, aes(x=City, y=Population, fill=Provinces)) + geom_bar(stat='identity') + theme_wsj()
+Graph
+```
+
+
+Step5.
+```{r}
+GraphReorder <- ggplot(DF2, aes(x=reorder(City, Population), y=Population, fill=Provinces)) + geom_bar(stat='identity') + theme_wsj()
+GraphReorder
+```
+
+
+Step6. 
+```{r}
+DF3 <- filter(DF, SexRatio > 1, PersInHou < 2)
+```
+
+
+Step7. 
+```{r}
+Graph <- ggplot(DF3, aes(x=City, y=SexRatio, fill=Provinces)) + geom_bar(stat='identity') + theme_wsj()
+Graph
+```

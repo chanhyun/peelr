@@ -1,0 +1,36 @@
+
+Step1.
+```{r}
+DF <- read.csv("example_salary.csv", stringsAsFactors = F, na="-")
+head(DF, 5)
+```
+
+
+Step2.
+```{r}
+colnames(DF) <- c("age", "salary", "specialSalary", "workingTime", "numberOfWorker", "career", "sex")
+```
+
+
+
+Step3.
+```{r}
+Scale <- scale(Resi)
+head(Scale, 10)
+```
+
+
+Step4.
+```{r}
+DF <- cbind(DF, scale = Scale)
+str(DF)
+```
+
+
+Step5.
+```{r}
+g1 <- ggplot(DF, aes(x=scale, y=age))
+g2 <- geom_segment(aes(yend=age), xend=0)
+g3 <- g1 + g2 + geom_point(size=7, aes(colour=sex, shape=career)) + theme_minimal()
+g3
+```

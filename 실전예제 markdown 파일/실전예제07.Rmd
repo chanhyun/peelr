@@ -1,0 +1,87 @@
+
+Step1.
+```{r}
+DF <- read.csv("example_salary.csv", stringsAsFactors = F, na="-")
+head(DF, 5)
+```
+
+
+
+Step2.
+```{r}
+colnames(DF)
+colnames(DF) <- c("age", "salary", "specialSalary", "workingTime", "numberOfWorker", "career", "sex")
+```
+
+
+Step3.
+```{r}
+temp <- tapply(DF$salary, DF$sex, mean, na.rm=T)
+temp
+```
+
+
+Step5.
+```{r}
+require("reshape2")
+melt <- melt(temp)
+ggplot(melt, aes(x=Var1, y=value, fill=Var1)) + geom_bar(stat="identity")
+```
+
+Step6.
+```{r}
+temp
+as.data.frame(temp)
+melt(temp)
+```
+
+
+Step7.
+```{r}
+tapply(DF$salary, DF$sex, sd, na.rm=T)
+```
+
+
+Step8.
+```{r}
+tapply(DF$salary, DF$sex, range, na.rm=T)
+```
+
+
+Step9.
+```{r}
+temp <- tapply(DF$salary, DF$career, mean, na.rm=T)
+temp
+```
+
+
+Step10.
+```{r ch2_ex2_02}
+melt <- melt(temp)
+melt
+ggplot(melt, aes(x=Var1, y=value, group=1)) + geom_line(colour="skyblue2", size=2) + coord_polar() + ylim(0, max(melt$value))
+```
+
+Step11.
+```{r}
+tapply(DF$salary, DF$career, sd, na.rm=T)
+```
+
+
+Step12.
+```{r}
+tapply(DF$salary, DF$career, range, na.rm=T)
+```
+
+
+Step13.
+```{r}
+a1 <- DF[which(DF$salary == 1172399),]
+a2 <- DF[which(DF$salary == 1685204),]
+a3 <- DF[which(DF$salary == 1117605),]
+a4 <- DF[which(DF$salary == 1245540),]
+a5 <- DF[which(DF$salary == 1548036),]
+list <- list(a1,a2,a3,a4,a5)
+list
+```
+

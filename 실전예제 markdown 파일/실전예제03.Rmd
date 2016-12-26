@@ -1,0 +1,131 @@
+```{r}
+rm(list=ls())
+```
+
+Step1
+```{r, eval=F}
+library("data.table")
+library("ggplot2")
+```
+
+
+Step2
+```{r}
+DF <- fread("example_coffee.csv", header = T, stringsAsFactors = T, data.table = F)
+```
+
+
+Step3
+```{r}
+str(DF)
+```
+
+
+Step4
+```{r}
+DF <- subset(DF, select=c(-adress, -adressBystreet, -dateOfclosure, -startdateOfcessation, -duedateOfcessation, -dateOfreOpen, -zip))
+str(DF)
+```
+
+Step5
+```{r}
+range(DF$yearOfStart, na.rm=T)
+```
+
+
+```{r}
+subset(DF, subset=(yearOfStart==1964))
+```
+
+
+```{r}
+DFFilter <- subset(DF, subset = (stateOfbusiness=="운영중"))
+range(DFFilter$yearOfStart, na.rm=T)
+subset(DFFilter, subset=(yearOfStart==1967))
+```
+
+
+Step6
+```{r}
+table(DF$yearOfStart)
+```
+
+
+Step7
+```{r ch1_ex_03_01}
+qplot(yearOfStart, data=DF, geom="bar", binwidth=1)
+```
+
+ 
+Step8
+```{r}
+Freq <- table(DF$stateOfbusiness, DF$yearOfStart)
+Freq
+```
+
+
+Step9
+```{r}
+which(colnames(Freq) == '1997')
+which.max(colnames(Freq))
+Freq <- Freq[,c(30:47)]
+```
+
+
+Step9
+```{r}
+PFreq <- prop.table(Freq, margin=2)
+PFreq
+```
+
+
+Step11
+```{r}
+NewDF <- data.frame(colnames(Freq), Freq[1,], Freq[2,], PFreq[1,], PFreq[2,])
+NewDF
+```
+
+
+```{r}
+rownames(NewDF) <- NULL
+colnames(NewDF) <- c("Time", "Open", "Close", "POpne", "PClose")
+NewDF
+```
+
+
+Step13
+```{r ch1_ex_03_02}
+ggplot(NewDF, aes(x=factor(Time), y=Close, group=1)) +
+  geom_line(colour="steelblue1", size=1) +
+  geom_point(colour="steelblue", size=3) +
+  geom_line(aes(y=Open), colour="tomato2", size=1) +
+  geom_point(aes(y=Open), colour="red", size=6) +
+  ggtitle("전국 커피숍 개업과 폐업 수 비교") +
+  theme_light() +
+  xlab("연도")+
+  ylab("개수") +
+  theme(plot.title = element_text(lineheight = .8, face="bold", size=rel(2), colour="#49659f"))
+```
+
+
+```{r ch1_ex_03_02_modify}
+N <- subset(NewDF, select=c(-POpne, -PClose))
+library(reshape2)
+N2 <- melt(N)
+colnames(N2) <- c("Time", "Stat", "Value")
+
+ggplot(N2, aes(x=factor(Time), y=Value, colour=Stat)) +
+  geom_line(colour="steelblue1", size=1) +
+  geom_point(size=4) +
+  ggtitle("전국 커피숍 개업과 폐업 수 비교") +
+  theme_light() +
+  xlab("연도")+
+  ylab("개수") +
+  theme(plot.title = element_text(lineheight = .8, face="bold", size=rel(2), colour="#49659f"))
+```
+
+
+```{r eval=F}
+ggplot(NewDF, aes(x=factor(Time), y=Close, group=1)) + geom_line(colour="steelblue1", size=1) + geom_point(colour="steelblue", size=3) + geom_line(aes(y=Open), colour="tomato2", size=1) + geom_point(aes(y=Open), colour="red", size=6) + theme_bw()
+```
+

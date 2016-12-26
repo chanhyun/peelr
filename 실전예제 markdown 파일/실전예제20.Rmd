@@ -1,0 +1,103 @@
+
+##Step1.
+```{r}
+eventlist <- c("구카카콜 250미리리터(캔)", "세계콘 170미리리터", "딸기속우유 310미리리터(팩)", "조르지아오리지널 240미리리터(캔)", "육개장사발탕면 86g(컵)", "카페라떼와일드 200미리리터(컵)", "핫개컨디션파워 100미리리터(병)", "비타528 100미리리터(병)")
+```
+
+
+##Step2.
+```{r}
+event <- read.csv("example_eventsale.csv", header=F)
+event <- as.list(event)
+event <- lapply(event, as.character)
+head(event,3)
+```
+
+
+##Step3.
+```{r}
+library(data.table)
+DF <- fread("example_conveniencestore.csv", encoding="UTF-8", data.table=F)
+```
+
+
+##Step4.
+```{r}
+S <- DF[sample(nrow(DF), 1000),]
+```
+
+
+##Step5.
+```{r}
+library(dplyr)
+
+S2 <- S %>% filter(sellproduct == eventlist[1] | sellproduct == eventlist[2]  | sellproduct == eventlist[3]  | sellproduct == eventlist[4]  | sellproduct == eventlist[5]  | sellproduct == eventlist[6] | sellproduct == eventlist[7] | sellproduct == eventlist[8] ) %>% group_by(sellproduct) %>% summarise(margin=min(margin)) %>% mutate(marginTF=ifelse(margin > 0.13, 1, 0))
+
+S2
+```
+
+
+##Step6.
+```{r}
+library(gtools)
+com <- combinations(length(eventlist), 6, eventlist, repeats.allowed = T)
+nrow(com)
+```
+
+
+##Step7.
+```{r}
+c <- NULL;
+for(j in 1:length(event)){
+  for(i in 1:nrow(com)){
+    if(all(event[[j]] %in% com[i,])){
+      c <- c(c,i)
+      break()
+    }
+  }
+}
+head(c, 10)
+```
+
+
+##Step8.
+```{r}
+com2 <- com
+for (i in 1:length(eventlist)) {
+  com2[com == eventlist[i]] <- S2[S2$sellproduct == eventlist[i],]$marginTF
+}
+com3 <- apply(com2, 2, as.integer)
+```
+
+
+##Step9.
+```{r}
+rv <- rowSums(com3)
+rv
+```
+
+
+##Step10.
+```{r}
+rv <- table(rv[c])
+rv
+addmargins(rv)
+```
+
+
+##Step11.
+```{r new_Ch5_ex02}
+library(ggplot2)
+library(ggthemes)
+rv_df <- as.data.frame(rv)
+rv_df
+ggplot(rv_df, aes(x=factor(Var1), y=Freq, fill=Var1)) + geom_bar(stat="identity")
+```
+
+
+##Step11.
+```{r}
+prop <- prop.table(rv)
+prop
+```
+

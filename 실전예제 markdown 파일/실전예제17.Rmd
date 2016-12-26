@@ -1,0 +1,95 @@
+
+Step1.
+```{r}
+library(dplyr)
+library(rCharts)
+```
+
+
+Step2.
+```{r}
+DF <- read.csv("example_2015_expenditure.csv")
+str(DF)
+```
+
+
+Step3.
+```{r}
+DF2 <- DF
+```
+
+
+Step4.
+```{r}
+colnames(DF2)[6] <- "value"
+DF2['value'] <- round(DF2['value']/1000)
+```
+
+
+Step5.
+```{r}
+DF3 <- DF2
+```
+
+Step6.
+```{r}
+sum1 <- DF3 %>% group_by(소관명,회계명) %>% summarise(sum(value))
+sum2 <- DF3 %>% group_by(회계명,분야명) %>% summarise(sum(value))
+sum3 <- DF3 %>% group_by(분야명,부문명) %>% summarise(sum(value))
+sum4 <- DF3 %>% group_by(부문명,프로그램명) %>% summarise(sum(value))
+```
+
+
+```{r}
+sum1
+```
+
+Step7.
+```{r}
+colnames(sum1) <- c("source", "target", "value")
+colnames(sum2) <- c("source", "target", "value")
+colnames(sum3) <- c("source", "target", "value")
+colnames(sum4) <- c("source", "target", "value")
+```
+
+
+Step8.
+```{r}
+DF4 <- rbind(sum1, sum2, sum3, sum4)
+```
+
+
+Step9.
+```{r}
+sankeyPlot <- rCharts$new()
+```
+
+
+Step10.
+```{r}
+sankeyPlot$setLib('libraries/sankey')
+sankeyPlot$setTemplate(script = "libraries/sankey/layouts/chart.html")
+```
+
+
+Step11.
+```{r}
+sankeyPlot$set(
+  data = DF4,
+  nodeWidth = 15,
+  nodePadding = 13,
+  layout = 300,
+  width = 900,
+  height = 600,
+  units = "천원",
+  title = "Sankey Diagram"
+)
+```
+
+
+Step12.
+```{r eval=F}
+sankeyPlot
+```
+
+
