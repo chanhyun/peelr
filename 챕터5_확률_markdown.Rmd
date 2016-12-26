@@ -1,0 +1,779 @@
+---
+title: "Probability Distribution"
+author: "Hyunjong"
+date: "2016년 7월 29일"
+output: html_document
+---
+
+확률과 추정
+```{r 정규분포 사례}
+  #정규분포
+  #한국 여자의 키를 난수로(15500~16500) 30개씩 추출하여 평균을 구함. 이를 100만번 반복하여 도수를 계산
+
+heights <- integer(1000000)
+for (i in 1:1000000) {
+  y <- as.integer(runif(30, min = 15500, max = 16500))
+  heights[i] <- as.integer(mean(y))
+}
+FreqHeights <- table(heights)
+  
+  #도수를 표로 보여주기
+plot(FreqHeights, type="h", lwd=2, main = "Normal Distribution (Freq.)")
+  x <- seq(1, length(FreqHeights), 1)
+  lines(x, FreqHeights, col="red")
+
+#상대도수를 표로 보여주고 선을 표현
+hist(heights, breaks = 1000 , prob = T)
+lines(density(heights), col = "white")
+```
+```{r 표준정규분포}
+#표준정규분포
+x <- seq(from=-4, to=4, length.out = 1000)
+ylim <- c(0, 0.5)
+plot(x, dnorm(x, mean=0, sd=1), main = "Standard Normal Distribution", type = 'l', ylim = ylim, ylab="f(x)")
+```
+```{r Z분포 확률범위}
+# Z분포
+par(mfrow=c(2,2))
+# Probability Z Greater than 0
+curve(dnorm(x,0,1), -4,4, xlab="z", ylab="f(z)", main = "Z > 0, 50%")
+z=seq(0, 4, 0.02)
+lines(z,dnorm(z), type="h", col="grey")
+# 90% Coverage
+curve(dnorm(x,0,1), -4,4, xlab="z", ylab="f(z)", main = "Confidence level : 90%")
+z=seq(-1.645, 1.645, 0.001)
+lines(z, dnorm(z), type="h", col="grey")
+# 95% Coverage
+curve(dnorm(x,0,1), -4,4, xlab="z", ylab="f(z)", main = "Confidence level : 95%")
+z=seq(-1.96, 1.96, 0.001)
+lines(z,dnorm(z), type="h", col="grey")
+# 90% Coverage
+curve(dnorm(x,0,1), -4,4, xlab="z", ylab="f(z)", main = "Confidence level : 99%")
+z=seq(-2.58, 2.58, 0.001)
+lines(z, dnorm(z), type="h", col="grey")
+```
+
+다양한 분포
+```{r Student-t 분포 자유도에 따라}
+# Student-t 분포
+    # 자유도에 따른 t분포
+par(mfrow=c(2,2))
+n_list <- c(2, 5, 10, 30) # 표본수 n
+df_list <- n_list - 1  # 자유도 df
+
+for (i in 1:length(df_list)) {
+    curve(dt(x, df_list[i]), -4,4, xlab="t", ylab="f(t)", ylim = c(0, 0.5), main = paste("df = ", df_list[i]))
+}
+
+```
+```{r Student-t 분포 t값 계산}
+# Student-t 분포
+    # 자유도에 따른 t분포
+par(mfrow=c(2,2))
+n_list <- c(2, 5, 10, 30) # 표본수 n
+df_list <- n_list - 1  # 자유도 df
+
+for (i in 1:length(df_list)) {
+    curve(dt(x, df_list[i]), -4,4, xlab="t", ylab="f(t)", ylim = c(0, 0.5), main = paste("df = ", df_list[i]))
+}
+
+    # 통계도서 판매 t분포
+
+par(mfrow=c(1,1))
+x <- c(25, 24, 24, 27, 29, 31, 28, 24, 25, 26, 25, 18, 30, 28, 23, 26, 27, 23, 16, 20, 22, 22, 25, 24, 24, 25, 25, 27, 26, 30, 25, 25, 26, 26, 25, 24)
+n <- length(x) # n
+df <- n-1 # 자유도
+x_mean <- mean(x) # 표본평균
+x_sd <- sd(x); x_sd #표준편차
+x_se <- x_sd/sqrt(n); x_se #표준오차
+x_temp <- c(23, 24, 25, 26, 27)
+x_temp_t <- round((x_temp-x_mean)/x_se,3); x_temp_t
+
+    curve(dt(x, df), -4, 4, xlab="t", ylab="f(t)", ylim = c(0, 0.5), main = paste("n =", n, ", df = ", df))
+    lines(x_temp_t, (x_temp_t-x_temp_t)+0.1, type="h", col="red")
+```
+```{r Student-t 분포 신뢰구간추정}
+    par(mfrow=c(1,1))
+#예제 - 월간 도서판매량의 95%신뢰구간
+    x <- c(25, 24, 24, 27, 29, 31, 28, 24, 25, 26, 25, 18, 30, 28, 23, 26, 27, 23, 16, 20, 22, 22, 25, 24, 24, 25, 25, 27, 26, 30, 25, 25, 26, 26, 25, 24)
+    n <- length(x)
+    df <- n-1
+    mean_x <- mean(x); mean_x # 평균
+    sd_x <- sd(x); sd_x      #표준편차 
+se_x <- sd_x/sqrt(n); se_x   #표준오차
+
+# 모집단 평균의 95% 신뢰구간은?
+    t_left <- qt(0.025, df); t_left    #좌측 t값
+    t_right <- qt(0.975, df); t_right  #우측 t값 
+    
+    interval_left <- t_left * se_x; interval_left    #좌측 구간
+    interval_right <- t_right * se_x; interval_right  #우측 구간
+    
+    conf_lower <- mean_x + interval_left; conf_lower   #신뢰구간 하한
+    conf_upper <- mean_x + interval_right; conf_upper  #신뢰구간 상한
+
+# 모집단 95% 신뢰구간 간단하게
+    conf_lower <- mean_x + qt(0.025, df) * se_x
+    conf_upper <- mean_x + qt(0.975, df) * se_x
+    paste("모집단 평균의 95%신뢰구간 하한은 ", conf_lower, " 상한은 ", conf_upper)
+
+    mean_x + qt(c(0.025, 0.975), df) * se_x 
+    
+    
+# 모집단의 평균이 특정 범위에 들어갈 확률은?
+    lower_value <- 25  #하한 값
+    upper_value <- 26  #상한 값
+
+    t_left <- (lower_value - mean_x)/se_x; t_left    #하한 값에 해당하는 t-value
+    t_right <- (upper_value - mean_x)/se_x; t_right  #상한 값에 해당하는 t-value
+    
+    # 자유도와 t-value에 해당하는 확률
+    p_left <- 1-pt(t_left, df); p_left       # 하한 t-value의 확률(왼쪽꼬리)
+    p_right <- 1-pt(t_right, df); p_right    # 상한 t-value의 확률(왼쪽꼬리)
+    p_result <- p_left - p_right; p_result
+
+    # t-value의 상한 하한을 확률구간을 도표에 나타내면
+    curve(dt(x,df), -4, 4, xlab="t", ylab="f(t)", main = paste("P(",round(t_left, 3), " <= t <= ", round(t_right,3), ") = ", round(p_result, 5)))
+    t_range=seq(t_left, t_right, 0.02)
+    lines(t_range, dt(t_range,df), type="h", col="grey")
+
+
+
+```
+```{r Student-t와 z}
+# Student-t 분포
+
+par(mfrow=c(1,1))
+
+# 자유도와 t-value에 해당하는 확률
+pt(1.96, df = c(1:10,20,30,50,100,1000))
+
+# 자유도와 확률에 해당하는 t-value
+qt(.975, df = c(1:10,20,30,50,100,1000))
+
+# t분포는 t-value를 기준으로 왼쪽 꼬리부분의 면적을 확률로 계산
+# 우측 꼬리부분 면적을 계산하려면 > 1-pt()
+n <- 100 # 표본의 수
+
+x_bar <- 196
+df <- n-1 #자유도
+t_value <- -1.96 #확률을 알고 싶은 t-value
+prob <- 1-pt(t_value, df); prob 
+
+# t>=-1.96, 즉 0.9848633의 확률구간을 도표에 나타내면
+curve(dt(x,df), -4, 4, xlab="t", ylab="f(t)", main = paste("t >= ", t_value, " prob. = ", round(prob, 3)))
+t_range=seq(t_value, 4, 0.02)
+lines(t_range, dt(t_range,df),type="h",col="grey")
+
+
+
+
+```
+```{r Student-t 분포 확률범위}
+# T분포
+par(mfrow=c(2,2))
+# Probability Z Greater than 0
+curve(dt(x,30),-4,4,xlab="t",ylab="f(t)", main = "t > 0, 50%")
+t=seq(0,4,0.02)
+lines(t, dt(t,30),type="h",col="grey")
+# 90% Coverage
+curve(dt(x,30),-4,4,xlab="t",ylab="f(t)", main = "Confidence level : 90%")
+t=seq(-1.96,1.96,0.001)
+lines(t, dt(t,30),type="h",col="grey")
+# 95% Coverage
+curve(dt(x,30),-4,4,xlab="t",ylab="f(t)", main = "Confidence level : 95%")
+t=seq(-1.96,1.96,0.001)
+lines(t, dt(t,30),type="h",col="grey")
+# 99% Coverage
+curve(dt(x,30),-4,4,xlab="t",ylab="f(t)", main = "Confidence level : 99%")
+t=seq(-2.58,2.58,0.001)
+lines(t, dt(t,30),type="h",col="grey")
+```
+```{r 포아송 분포}
+
+#포아송 분포
+par(mfrow=c(2, 2))
+  
+lambda_list <- c(3, 5, 10, 15, 20, 30) # 평균 리스트
+x_list <- 30  #발생하는 횟수 (1부터 x축에 보여줄 최대값)
+
+for (i in 1:length(lambda_list)) {
+    p_x <- dpois(x=0:x_list, lambda_list[i])
+    plot(x=0:x_list, p_x, xlab="x", ylab="P(X=x)", ylim = c(0, 0.25), xlim = c(0, x_list), main = paste("lambda = ", lambda_list[i]))
+    x_seq <- seq(0, x_list, 1)
+    lines(x_seq, p_x, type="h", col="blue")
+}
+  
+```
+```{r 포아송 분포 예제}
+
+#포아송 분포 예제
+par(mfrow=c(1, 1))
+  
+    lambda <- 5 # 평균 (일주일 평균 소동횟수)
+    x_list <- c(0:20)
+    
+    p_list <- round(dpois(x_list, lambda), 5); p_list # 0~20까지 확률
+
+    lambda_day <- lambda / 7 # 평균 (하루 평균 소동횟수)
+    
+    p_x_0 <- dpois(0, lambda_day); p_x_0   # 하루 소동횟수 0회일 확률
+
+    x <- 3 # x이상의 확률을 포아송분포에 표시합니다.
+    p_x_above3 <- 1-sum(dpois(c(0:x-1), lambda)); p_x_above3 # 1에서 x미만 확률을 빼줍니다.
+
+    p_x <- dpois(x_list, lambda)
+    plot(x_list, p_x, xlab="x", ylab="P(X=x)", ylim = c(0, 0.25), xlim = c(0, 20), main = paste("lambda = ", lambda, ", X >= ", x))
+    x_seq <- seq(x, 20, 1)
+    lines(x_seq, dpois(x_seq, lambda), type="h", col="red")
+
+    qpois(seq(0, 0.95, 0.05), 5) # 확률에 해당하는 발생 횟수, 평균(lambda) = 5
+```
+```{r 지수 분포}
+
+#지수 분포
+par(mfrow=c(2, 2))
+  
+lambda_list <- c(1, 0.2, 0.3, 0.5, 0.7) # Rate 리스트
+x_list <- 10  #발생하는 횟수 
+
+  curve(dexp(x, lambda_list[1]), 0, x_list, ylab="f(x)", xlab="x", cex.axis=1)
+for (i in 2:length(lambda_list)) {
+  curve(dexp(x, lambda_list[i]), add=TRUE, col=i)
+}
+  legend(6,1,paste("Lambda = ", lambda_list), col=1:length(lambda_list), pch= "_____")
+
+for (i in 1:length(lambda_list)) {
+  curve(dexp(x, lambda_list[i]), 0, x_list, ylab="f(x)", xlab="x", ylim = c(0, 1), main = paste("Lambda = ", lambda_list[i]), col=i)
+}
+
+```
+```{r 지수 분포 예제}
+
+#지수 분포 에제
+lambda_min <- 12 # 평균 통화간격
+x_list <- seq(1, 20, 1)
+round(pexp(x_list, rate = 1/lambda_min, lower.tail = FALSE), 5) # 1분이후..20분이후 통화확률
+round(pexp(x_list, rate = 1/lambda_min), 5) # 1분이내..20분이내 통화확률
+
+x <- 5
+round(pexp(x, rate = 1/lambda_min, lower.tail = FALSE), 5) # 5분이후 통화확률
+
+x_lower <- 6; x_upper <- 10 # 특정 시간 사이에 통화할 확률
+p_lower <- round(pexp(x_lower, rate = 1/lambda_min, lower.tail = FALSE), 5)
+p_upper <- round(pexp(x_upper, rate = 1/lambda_min, lower.tail = FALSE), 5)
+p_lower-p_upper 
+
+curve(dexp(x, rate = 1/lambda_min), 0, 40, xlab="x", ylab="f(x)", ylim = c(0, 0.12), main = paste("Rate = ", round(1/lambda_min, 3), ", ", x_lower, " >= X >= ", x_upper))
+x_seq <- seq(x_lower, x_upper, 0.02)
+lines(x_seq, dexp(x_seq, rate = 1/lambda_min), type="h", col="red")
+```
+```{r 이항분포}
+#이항분포
+par(mfrow=c(2, 2))
+
+n <- 30 # 시행횟수
+p_list <- c(0.1, 0.3, 0.5, 0.7)  #추출하는 표본의 수
+
+for (i in 1:length(p_list)) {
+    p_x <- dbinom(x=1:n, n, p_list[i])
+    plot(x=1:n, p_x, xlab="x", ylab="P(X=x)", ylim = c(0, 0.25), xlim = c(1, n), main = paste("n = ", p_list[i]))
+    x_seq <- seq(1, n,1)
+    lines(x_seq, p_x, type="h", col="blue")
+}
+
+```
+```{r 이항분포 예제}
+#이항분포
+
+n <- 10 # 시행횟수
+p <- 0.3  #추출하는 표본의 수
+x_list <- c(0:n)
+x_lower <- 1
+x_upper <- 3
+
+round(dbinom(x_list, n, prob = p), 3)
+
+round(dbinom(x_lower:x_upper, n, prob = p), 3)
+sum(dbinom(x_lower:x_upper, n, prob = p))
+
+p_x <- dbinom(x_list, n, p)
+plot(x_list, p_x, xlab="x", ylab="P(X=x)", ylim = c(0, 0.4), xlim = c(0, n), main = paste("n = ", n, " p = ", p))
+x_seq <- seq(x_lower, x_upper, 1)
+lines(x_seq, dbinom(x_seq, n, p), type="h", col="red")
+
+```
+```{r 기하 분포}
+
+#기하 분포
+par(mfrow=c(2, 2))
+  
+p_list <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.7) # 평균 리스트
+x_list <- 50  #발생하는 횟수 (1부터 x축에 보여줄 최대값)
+
+for (i in 1:length(p_list)) {
+    p_x <- dgeom(x=0:x_list, p_list[i])
+    plot(x=0:x_list, p_x, xlab="x", ylab="P(X=x)", ylim = c(0, p_list[i]+0.1), xlim = c(0, x_list), main = paste("p = ", p_list[i]))
+    x_seq <- seq(0, x_list, 1)
+    lines(x_seq, p_x, type="h", col="blue")
+}
+  
+```
+```{r 기하분포 예제}
+par(mfrow=c(1, 1))
+
+#기하분포 예제
+p <- 0.3  #발생 확률
+x_list <- c(0:30)
+x_lower <- 3  #사례 하한
+x_upper <- 5  #사례 상한
+
+round(dgeom(x_list, prob = p), 3)
+
+round(dgeom(x_lower:x_upper, prob = p), 3)
+sum(dgeom(x_lower:x_upper, prob = p))
+
+p_x <- dgeom(x_list, prob = p)
+plot(x_list, p_x, xlab="x", ylab="P(X=x)", ylim = c(0, 0.4), xlim = c(0, 30), main = paste("p = ", p))
+x_seq <- seq(x_lower, x_upper, 1)
+lines(x_seq, dgeom(x_seq, prob = p), type="h", col="red")
+
+```
+```{r 초기하 분포}
+
+#초기하 분포
+par(mfrow=c(2,2))
+  
+m <- 100   #전체중 특정 현상 수
+n <- 200   #전체중 특정 현상 외 수
+
+k_list <- c(50, 100, 150, 200, 250, 300)  #추출하는 표본의 수
+x_list <- 80 # 추출한 표본중 특정 결과의 수 
+
+for (i in 1:length(k_list)) {
+    p_x <- dhyper(x=1:x_list, m, m+n, k_list[i])
+    plot(x=1:x_list, p_x, xlab="x", ylab="P(X=x)", ylim = c(0, 0.15), xlim = c(1, x_list), main = paste("k = ", k_list[i]))
+    x_seq <- seq(1, x_list,1)
+    lines(x_seq, p_x, type="h", col="blue")
+}
+  
+```
+```{r 초기하 분포 예제}
+
+#초기하 분포 예제
+par(mfrow=c(1, 1))
+  
+m <- 121   #전체 중 특정 현상 수
+n <- 206   #전체 중 특정 현상 외 수
+
+k <- 10  #추출하는 표본의 수
+x <- 0 # 추출한 표본 중 특정 결과의 수
+x_list <- 10 # 추출한 표본 중 특정 결과의 수
+
+round(dhyper(0:x_list, m, m+n, k), 5)
+
+x_lower <- 3  #사례 하한
+x_upper <- 5  #사례 상한
+
+x_p <- sum(round(dhyper(x_lower:x_upper, m, m+n, k), 5));x_p
+
+    p_x <- dhyper(0:x_list, m, m+n, k)
+    plot(x=0:x_list, p_x, xlab="x", ylab="P(X=x)", ylim = c(0, 0.30), xlim = c(1, x_list), main = paste("k = ", k, ", P(", x_lower, "<= X <=", x_upper, ") = ", x_p))
+    x_seq <- seq(x_lower, x_upper, 1)
+    lines(x_seq, dhyper(x_lower:x_upper, m, m+n, k), type="h", col="red")
+
+```
+
+가설검정
+```{r 가설검정}
+    par(mfrow=c(2, 1))
+#예제 - 월간 도서판매량의 95%신뢰구간
+    x <- c(25, 24, 24, 27, 29, 31, 28, 24, 25, 26, 25, 18, 30, 28, 23, 26, 27, 23, 16, 20, 22, 22, 25, 24, 24, 25, 25, 27, 26, 30, 25, 25, 26, 26, 25, 24)
+    n <- length(x)
+    df <- n-1
+    mean_x <- mean(x); mean_x # 평균
+    sd_x <- sd(x); sd_x      #표준편차 
+    se_x <- sd_x / sqrt(n); se_x   #표준오차
+    alpha = 0.05 # 양측이므로 alpha/2
+    conf_level = 1-alpha
+
+# 모집단 평균의 95% 신뢰구간은?
+    z_left <- qnorm(alpha/2, 0, 1); z_left    #좌측 z값
+    z_right <- qnorm(1-alpha/2, 0, 1); z_right  #우측 z값 
+    
+    interval_left <- z_left * se_x; interval_left    #좌측 구간
+    interval_right <- z_right * se_x; interval_right  #우측 구간
+    
+    conf_lower <- mean_x + interval_left; conf_lower   #신뢰구간 하한
+    conf_upper <- mean_x + interval_right; conf_upper  #신뢰구간 상한
+
+# 모집단 95% 신뢰구간 간단하게
+    conf_lower <- mean_x + qnorm(alpha/2, 0, 1) * se_x
+    conf_upper <- mean_x + qnorm(1-alpha/2, 0, 1) * se_x
+    paste("모집단 평균의 ", conf_level * 100,"% 신뢰구간 하한은 ", conf_lower, " 상한은 ", conf_upper)
+# 모집단 신뢰구간 
+    mean_x + qnorm(c(alpha/2, 1-alpha/2), 0, 1) * se_x 
+    
+    qnorm(c(alpha/2, 1-alpha/2), mean_x, se_x)
+    
+    p_value <- 1-pnorm(26, mean_x, se_x);  p_value
+    0.5-p_value
+
+    
+
+    # z-value의 상한 하한을 확률구간을 도표에 나타내면
+    curve(dnorm(x, 0, 1), -4, 4, xlab="z", ylab="f(z)", main = paste("P(",round(z_left, 3), " <= Z <= ", round(z_right, 3), ") = ", conf_level * 100, "%"))
+    z_range=seq(z_left, z_right, 0.02)
+    lines(z_range, dnorm(z_range, 0, 1), type="h", col="red")
+
+    curve(dnorm(x, mean_x, se_x), 23, 27, xlab="z", ylab="f(z)", main = paste("P(",round(conf_lower, 3), " <= X bar <= ", round(conf_upper, 3), ") = ", conf_level * 100, "%"))
+    conf_range=seq(conf_lower, conf_upper, 0.01)
+    lines(conf_range, dnorm(conf_range, mean_x, se_x), type="h", col="blue")
+    
+    
+        
+# 모집단 평균의 99% 신뢰구간은?
+    alpha = 0.01
+    conf_level = 1-alpha
+    
+    qnorm(c(alpha/2, 1-alpha/2), 0, 1)
+    qnorm(c(alpha/2, 1-alpha/2), mean_x, se_x)
+    
+
+
+```
+```{r 단일모집단 평균 가설검정 - 접수시간}
+    par(mfrow=c(3, 1))
+#예제 - 스마트폰 A/S센터 접수시간
+DF <- read.csv("H_test_mean_AS_leadtime.csv", fileEncoding = "UTF-8")
+HO <- DF$leadtime2015
+HA <- DF$leadtime2016
+n_HO <- length(HO)  #표본 수
+n_HA <- length(HA)
+mean_HO <- mean(HO); mean_HO # 평균
+mean_HA <- mean(HA); mean_HA
+sd_HO <- sd(HO); sd_HO      #표준편차 
+sd_HA <- sd(HA); sd_HA
+se_HO <- sd_HO / sqrt(n_HO); se_HO   #표준오차
+se_HA <- sd_HA / sqrt(n_HA); se_HA
+
+alpha = 0.05 # 유의수준(양측)     <<< 유의수준을 변경하여 검정결과를 확인
+conf_level = 1-alpha
+
+# 모집단 평균의 신뢰구간
+z_left <- qnorm(alpha/2, 0, 1); z_left    #좌측 z값 (표준화 임계치)
+z_right <- qnorm(1-alpha/2, 0, 1); z_right  #우측 z값 (표준화 임계치)
+
+test_z <- (mean_HA - mean_HO)/se_HO; test_z # 검정통계량의 z-value
+
+interval_left <- z_left * se_HO; interval_left    #좌측 신뢰구간 (단위)
+interval_right <- z_right * se_HO; interval_right  #우측 신뢰구간 (단위)
+
+conf_lower <- mean_HO + interval_left; conf_lower   #신뢰구간 하한 (단위 임계치)
+conf_upper <- mean_HO + interval_right; conf_upper  #신뢰구간 상한 (단위 임계치)
+
+# H0 모집단 신뢰구간(임계치) 간단하게
+    conf_lower <- mean_HO + qnorm(alpha/2, 0, 1) * se_HO
+    conf_upper <- mean_HO + qnorm(1-alpha/2, 0, 1) * se_HO
+    paste("모집단 평균의 ", conf_level * 100,"% 신뢰구간 하한은 ", conf_lower, " 상한은 ", conf_upper)
+# H0 모집단 신뢰구간(임계치) 한 줄로
+    mean_HO + qnorm(c(alpha/2, 1-alpha/2), 0, 1) * se_HO 
+    qnorm(c(alpha/2, 1-alpha/2), mean_HO, se_HO)
+    
+# H0 임계치와 검정통계량의 비교
+    ifelse(mean_HA > mean_HO, p_value <- 1-pnorm(mean_HA, mean_HO, se_HO, lower.tail = TRUE), p_value <- 1-pnorm(mean_HA, mean_HO, se_HO, lower.tail = FALSE)) # 단측
+    p_value * 2 # 양측
+# 검정 결론    
+    ifelse(p_value*2 >= alpha, "귀무가설 채택", "귀무가설 기각")
+
+
+# H0 임계치와 검정통계량을 표준정규분포표에 나타내면
+curve(dnorm(x, 0, 1), -4, 4, xlab="z", ylab="p(z)",  ylim = c(0, 0.45), main = paste("P(",round(z_left, 3), " <= Z <= ", round(z_right, 3), ") = ", conf_level * 100, "%"))
+z_range=seq(z_left, z_right, (z_right-z_left)/50)
+lines(z_range, dnorm(z_range, 0, 1), type="h", col="blue")
+lines(c(z_left, z_right), c(0.1, 0.1), type="h", col="black")
+lines(c(0, 0.0001), c(0.1, 0.1), type="h", col="black")
+lines(c(test_z, test_z+0.0001), c(0.1, 0.1), type="h", col="red")
+
+# H0 임계치와 검정통계량을 (단위)정규분포표에 나타내면
+curve(dnorm(x, mean_HO, se_HO), mean_HO-4*se_HO, mean_HO+4*se_HO, xlab="x", ylab="f(x)", ylim = c(0, 8), main = paste("P(",round(conf_lower, 3), " <= Mu <= ", round(conf_upper, 3), ") = ", conf_level * 100, "%"), col="blue")
+conf_range=seq(conf_lower, conf_upper, (conf_upper-conf_lower)/50)
+lines(conf_range, dnorm(conf_range, mean_HO, se_HO), type="h", col="blue")
+lines(c(conf_lower, conf_upper), c(2, 2), type="h", col="black")
+lines(c(mean_HO, mean_HO+0.0001), c(2, 2), type="h", col="black")
+lines(c(mean_HA, mean_HA+0.0001), c(2, 2), type="h", col="red")
+        
+# H0, HA 각각 입장에서 각각 신뢰구간을 나타내면 
+    # H0 분포
+    curve(dnorm(x, mean_HO, se_HO), mean_HO-4*se_HO, mean_HO+4*se_HO, xlab="x", ylab="f(x)", ylim = c(0, 8), main = paste("P(",round(conf_lower, 3), " <= Mu <= ", round(conf_upper, 3), ") = ", conf_level * 100, "%"), col="blue")
+    conf_range=seq(conf_lower, conf_upper, (conf_upper-conf_lower)/50)
+    # H0 신뢰구간
+    lines(conf_range, dnorm(conf_range, mean_HO, se_HO), type="h", col="blue")
+    # H0 임계치
+    lines(c(conf_lower, conf_upper), c(2, 2), type="h", col="black")
+    # H0 평균 (통설 값)
+    lines(c(mean_HO, mean_HO+0.0001), c(2, 2), type="h", col="black")
+
+    # HA 분포
+    curve(dnorm(x, mean_HA, se_HA), add = TRUE, col = "red")    
+    conf_HA <- qnorm(c(alpha/2, 1-alpha/2), mean_HA, se_HA);conf_HA
+    # HA 신뢰구간
+      #conf_range_HA <- seq(conf_HA[1], conf_HA[2], (conf_HA[2]-conf_HA[1])/50)
+      #lines(conf_range_HA, dnorm(conf_range_HA, mean_HA, se_HA), type="h", col="red")
+    # HA 임계치
+    #lines(conf_HA, c(2, 2), type="h", col="red")
+    # HA 평균 (검정통계량)
+    lines(c(mean_HA, mean_HA+0.0001), c(2, 2), type="h", col="red")
+
+    
+```
+```{r 단일모집단 평균 가설검정 - 광고노출}
+    par(mfrow=c(1,1))
+#예제 - 광고노출
+DF <- read.csv("H_test_mean_exposure.csv", fileEncoding = "UTF-8")
+    x <- DF$exposure
+    n <- length(x)
+    df <- n-1
+    mean_x <- mean(x); mean_x # 평균
+    sd_x <- sd(x); sd_x      #표준편차 
+    se_x <- sd_x/sqrt(n); se_x   #표준오차
+    alpha <- 0.01 # 유의수준
+    mu <- 60000
+
+# 귀무가설 채택역(신뢰구간)은?
+    t_left <- qt(alpha, df); t_left    #좌측 t값
+    t_right <- qt(alpha, df); t_right  #우측 t값 
+    
+    interval_left <- t_left * se_x; interval_left    #평균에서 좌측 구간(단위)
+
+    conf_lower <- mu + interval_left; conf_lower   #신뢰구간 하한(단위)
+
+
+# 귀무가설 채택역(신뢰구간) 간단하게
+    conf_lower <- mu + qt(alpha, df) * se_x
+    paste("귀무가설의 ", 1-alpha, "% 채택역(신뢰구간)은 [", round(conf_lower, 2), ", ~ ]")
+    mu + qt(c(alpha, 1-alpha), df) * se_x 
+    
+# 검정통계량
+    test_t <- (mean_x-mu)/se_x; test_t
+    
+# t-value의 상한 하한을 확률구간을 도표에 나타내면
+    curve(dt(x,df), -4, 4, xlab="t", ylab="f(t)", main = paste("P(",round(t_left, 3), " <= t ) = ", 1-alpha))
+    t_range=seq(t_left, 4, 0.02)
+    lines(t_range, dt(t_range,df), type="h", col="gray")
+    lines(c(test_t, test_t+0.0001), c(0.1, 0.1), type="h", col="red")
+
+# t.test()함수를 이용한 검정
+    DF <- read.csv("H_test_mean_exposure.csv", fileEncoding = "UTF-8")
+    x <- DF$exposure
+    t.test(x, alternative = "less", mu=60000, conf.level = 0.99)
+```
+```{r 두 모집단 평균차 검정 - 지역별 빵매출}
+#예제 - (주)런던 바게뜨 대전지역 빵구매금액 차이 검정
+
+# t.test()함수를 이용한 검정
+    DF <- read.csv("H_test_mean_bread.csv", fileEncoding = "UTF-8")
+    x <- DF$Residential
+    y <- DF$APT
+    t.test(x, y, alternative = "two.sided", mu=0, conf.level = 0.95, var.equal = TRUE)
+
+# 가설검정 상세과정
+    DF <- read.csv("H_test_mean_bread.csv", fileEncoding = "UTF-8")
+    x1 <- DF$Residential
+    x2 <- DF$APT
+
+    n1 <- length(x1)
+    n2 <- length(x2)
+    
+    df <- n1+n2-2
+    
+    mean_x1 <- mean(x1); mean_x1 # 평균
+    sd_x1 <- sd(x1); sd_x1      #표준편차 
+    se_x1 <- sd_x1/sqrt(n1); se_x1   #표준오차
+    mean_x2 <- mean(x2); mean_x2 # 평균
+    sd_x2 <- sd(x2); sd_x2      #표준편차 
+    se_x2 <- sd_x2/sqrt(n2); se_x2   #표준오차
+
+    Pooled_variance <- ((n1-1)*sd_x1^2 + (n2-1)*sd_x2^2) / (n1+n2-2); Pooled_variance # 합동분산
+    Std_error <- sqrt(Pooled_variance*(1/n1+1/n2))
+    
+    alpha <- 0.05 #유의수준
+    
+# 신뢰구간(채택역)과 검정통계량 - t-value
+    t_left <- qt(alpha/2, df); t_left    #좌측 t값
+    t_right <- qt(1-alpha/2, df); t_right  #우측 t값 
+    
+    test_t <- ((mean_x1 - mean_x2) - 0)/Std_error; test_t # t 검정통계량
+      
+# 신뢰구간(채택역)과 검정통계량 - 단위값
+    conf_lower <- 0 + qt(alpha/2, df) * Std_error
+    conf_upper <- 0 + qt(1-alpha/2, df) * Std_error
+    paste("모집단 평균의 95%신뢰구간(채택역) 하한은 ", conf_lower, " 상한은 ", conf_upper)
+
+    0 + qt(c(alpha/2, 1-alpha/2), df) * Std_error # 채택구간(간단히)
+    
+    test_value = mean_x1 - mean_x2; test_value  # 단위값 검정통계량
+
+    p_value = (1 - pt(test_t, df)) * 2; p_value # p-value
+
+# t-value의 상한 하한을 확률구간을 도표에 나타내면
+    curve(dt(x,df), -4, 4, xlab="t", ylab="f(t)", main = paste("P(",round(t_left, 3), " <= t <= ", round(t_right,3), ") = ", 1-alpha))
+    t_range=seq(t_left, t_right, 0.02)
+    lines(t_range, dt(t_range,df), type="h", col="grey")
+    lines(c(test_t, test_t+0.0001), c(0.1, 0.1), type="h", col="red")
+
+# 두 집단 표본 평균차의 신뢰구간
+    (mean_x1 - mean_x2) + qt(c(alpha/2, 1-alpha/2), df) * Std_error # 신뢰구간
+
+```
+```{r F 분포}
+
+#F 분포 - 분자 자유도의 변화에 따라
+  
+df_numerator <- c(5, 1, 2, 3, 4) # 분자의 자유도
+df_denominator <- 24 # 분모의 자유도
+f_limit <- 5  #발생하는 횟수 
+
+par(mfrow=c(1, 1))
+  curve(df(x, df_denominator, df_numerator[1]), 0, f_limit, ylab="p(f)", xlab="f", cex.axis=1)
+for (i in 2:length(df_numerator)) {
+  curve(df(x, df_denominator, df_numerator[i]), add=TRUE, col=i)
+}
+  legend(3.5,0.65,paste("df_numerator = ", df_numerator), col=1:length(df_numerator), pch= "_____")
+
+  par(mfrow=c(2, 2))
+for (i in 1:length(df_numerator)) {
+  curve(df(x, df_denominator, df_numerator[i]), 0, f_limit, ylab="p(f)", xlab="f", ylim = c(0, 1), main = paste("df_numerator = ", df_numerator[i]), col=i)
+}
+
+  
+  #F 분포 - 분모 자유도의 변화에 따라
+  
+df_numerator <- 2 # 분자의 자유도
+df_denominator <- c(3, 5, 10, 20, 50) # 분모의 자유도
+f_limit <- 5  #발생하는 횟수 
+
+par(mfrow=c(1, 1))
+  curve(df(x, df_denominator[1], df_numerator), 0, f_limit, ylab="p(f)", xlab="f", cex.axis=1)
+for (i in 2:length(df_denominator)) {
+  curve(df(x, df_denominator[i], df_numerator), add=TRUE, col=i)
+}
+  legend(3.5,0.65,paste("df_denominator = ", df_denominator), col=1:length(df_denominator), pch= "_____")
+
+  par(mfrow=c(2, 2))
+for (i in 1:length(df_denominator)) {
+  curve(df(x, df_denominator[i], df_numerator), 0, f_limit, ylab="p(f)", xlab="f", ylim = c(0, 1), main = paste("df_denominator = ", df_denominator[i]), col=i)
+}
+
+```
+```{r 세 모집단 이상 평균차 검정 - 음료와 만족도(완전무작위)}
+
+#예제 - 느린생각 사장의 숙취해소음료간 만족도 차이 검정
+     DF <- read.csv("H_test_ANOVA_oneway.csv", fileEncoding = "UTF-8")
+     x <- DF$Satisfaction
+     y <- DF$Drink
+ 
+# boxplot으로 흩어짐을 파악
+     attach(DF)
+     boxplot(Satisfaction ~ Drink, main = "Drink & Satisfaction", xlab = "Treatements: Drink A, B, C", ylab = "Satisfaction", col = "red")
+     
+# 기초통계
+    tapply(Satisfaction, Drink, summary)
+    detach(DF)
+
+# 일원배치분산분석(One-way ANOVA) 
+    H_test <- aov(Satisfaction ~ Drink, data = DF) # 또는 lm(Satisfaction ~ Drink, data = DF)
+    anova(H_test) # 또는 summary(H_test)
+    qf(0.95, 2, 24) # 임계치
+
+# ANOVA 분석의 기본 가설 검정
+    # 잔차 진단(Residual plot drawinig)
+    par(mfrow = c(2, 2))
+    plot(H_test)
+    qqnorm(resid(H_test))
+    qqline(resid(H_test))
+    # 잔차의 정규성 검정(Shapiro test)
+    shapiro.test(resid(H_test))
+    # 오차의 등분산 검정 (Bartlett test)
+    bartlett.test(Satisfaction ~ Drink, data = DF)
+    
+```
+```{r 세 모집단 이상 평균차 검정 - 숙취해소음료와 만족도(블록설계)}
+
+#예제 - 느린생각 사장의 숙취해소음료와 성별에 따른 만족도 차이 검정
+     DF <- read.csv("H_test_ANOVA_twoway_block.csv", fileEncoding = "UTF-8")
+
+# 기초통계
+    attach(DF)
+    tapply(Satisfaction, Drink, mean)
+    tapply(Satisfaction, Gender, mean)
+
+# 일원배치분산분석(One-way ANOVA)
+    H_test <- aov(Satisfaction ~ Drink, data = DF) # 또는 lm(Satisfaction ~ Drink, data = DF)
+    anova(H_test) # 또는 summary(H_test)
+    qf(0.95, 2, 6) # F 임계치
+    
+# boxplot으로 흩어짐을 파악
+     par(mfrow = c(1, 1))
+     boxplot(Satisfaction ~ Drink + Gender, main = "Drink, Gender and Satisfaction", xlab = "Drink * Gender", ylab = "Satisfaction", col = "red")
+
+# 이원배치분산분석(Two-way ANOVA) 
+    H_test <- aov(Satisfaction ~ Drink + Gender, data = DF) # 또는 lm(Satisfaction ~ Drink + Gender, data = DF)
+    anova(H_test) # 또는 summary(H_test)
+    qf(0.95, 2, 4) # F 임계치
+    df(DF$Satisfaction, 2, 2)
+    detach(DF)
+
+# ANOVA 분석의 기본 가설 검정
+    # 잔차 진단(Residual plot drawinig)
+    par(mfrow = c(2, 2))
+    plot(H_test)
+    qqnorm(resid(H_test))
+    qqline(resid(H_test))
+    # 잔차의 정규성 검정(Shapiro test)
+    shapiro.test(resid(H_test))
+    # 오차의 등분산 검정 (Bartlett test)
+    bartlett.test(Satisfaction ~ Drink, data = DF)
+    bartlett.test(Satisfaction ~ Gender, data = DF)
+
+```
+```{r 세 모집단 이상 평균차 검정 - 음료와 만족도(요인설계)}
+
+#예제 - 느린생각 사장의 숙취해소음료와 성별에 따른 만족도 차이 검정
+     DF <- read.csv("H_test_ANOVA_twoway_factorial.csv", fileEncoding = "UTF-8")
+     
+# 기초통계
+    attach(DF)
+    tapply(Satisfaction, Drink, mean)
+    tapply(Satisfaction, Gender, mean)
+    tapply(Satisfaction, list(Drink, Gender), mean)
+
+# boxplot으로 흩어짐을 파악
+     par(mfrow = c(1, 1))
+     boxplot(Satisfaction ~ Drink + Gender, main = "Drink, Gender and Satisfaction", xlab = "Drink * Gender", ylab = "Satisfaction", col = "red")
+     interaction.plot(Drink, Gender, Satisfaction, col = c("red", "blue"), main = "Interaction effect")
+
+     # 이원배치분산분석(Two-way ANOVA) 
+    H_test <- aov(Satisfaction ~ Drink + Gender + Drink*Gender, data = DF) # 또는 lm(Satisfaction ~ Drink + Gender + Drink*Gender, data = DF)
+    anova(H_test) # 또는 summary(H_test)
+    detach(DF)
+
+# ANOVA 분석의 기본 가설 검정
+    # 잔차 진단(Residual plot drawinig)
+    par(mfrow = c(2, 2))
+    plot(H_test)
+    qqnorm(resid(H_test))
+    qqline(resid(H_test))
+    # 잔차의 정규성 검정(Shapiro test)
+    shapiro.test(resid(H_test))
+    # 오차의 등분산 검정 (Bartlett test)
+    bartlett.test(Satisfaction ~ Drink, data = DF)
+    bartlett.test(Satisfaction ~ Gender, data = DF)
+
+```
+
+
+
+
+
+
